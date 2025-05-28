@@ -9,8 +9,7 @@
 - Input : -
 - Output
 
-json
-```
+``` json
 [
     { "id" : 1, "descripcion" : "desc de todo 1" },
     { "id" : 2, "descripcion" : "desc de todo 2" },
@@ -24,7 +23,7 @@ json
 - Input : "/:id" : Id del TODO.
 - Output
 
-json
-```
+
+``` json
     { "id" : 1, "descripcion" : "desc de todo 1" }
 ```
