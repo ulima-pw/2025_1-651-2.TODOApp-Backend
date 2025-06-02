@@ -50,6 +50,14 @@ app.post("/todos", (req : Request, resp : Response) => {
     const todo = req.body
     const todos = listaTODOs
 
+    if (todo.descripcion == undefined)
+    {
+        resp.status(400).json({
+            msg : "Debe enviar campo"
+        })
+        return
+    }
+
     todos.push({
         descripcion : todo.descripcion,
         id : new Date().getTime()
