@@ -13,6 +13,8 @@ app.use(bodyParser.urlencoded({
     extended : true
 }))
 
+app.use(express.static("assets"))
+
 const PORT = process.env.PORT
 
 
@@ -66,6 +68,84 @@ app.post("/todos", (req : Request, resp : Response) => {
     resp.json({
         msg : ""
     })
+})
+
+app.put("/todos/:id", (req : Request, resp : Response) => {
+    const todo = req.body
+    const todoId = req.params.id
+    const todos = listaTODOs
+
+    if (todoId == undefined)
+    {
+        resp.status(400).json({
+            msg : "Debe enviar un id como parte del path"
+        })
+        return
+    }
+
+    if (todo.descripcion == undefined)
+    {
+        resp.status(400).json({
+            msg : "Debe enviar un campo descripcion"
+        })
+        return
+    }
+
+    for (let t of todos)
+    {
+        if (t.id.toString() == todoId)
+        {
+            t.descripcion = todo.descripcion
+
+            resp.json({
+                msg : ""
+            })
+            return
+        }
+    }
+
+    resp.status(400).json({
+        msg : "No existe todo con ese id"
+    })
+})
+
+app.delete("/todos/:id", (req : Request, resp : Response) => {
+    const todoId = req.params.id
+    const todos = listaTODOs
+
+    const indiceAEliminar = listaTODOs.findIndex((t : TODO) => {
+        return t.id.toString() == todoId
+    })
+
+    if (indiceAEliminar == -1)
+    {
+        resp.status(400).json({
+            msg : "No existe todo con ese id"
+        })
+        return
+    }
+
+    todos.splice(indiceAEliminar, 1)
+
+    resp.json({
+        msg : ""
+    })
+
+    /*let indice = 0
+    for (let t of todos)
+    {
+        if (t.id.toString() == todoId)
+        {
+            todos.splice(indice, 1)
+            resp.json({
+                msg : ""
+            })
+            return
+        }
+        indice++
+    }*/
+
+    
 })
 
 app.listen(PORT, () => {
