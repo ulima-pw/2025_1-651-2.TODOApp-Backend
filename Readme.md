@@ -27,3 +27,23 @@
 ``` json
     { "id" : 1, "descripcion" : "desc de todo 1" }
 ```
+
+### Registrar TODO
+
+- Path : "/todos"
+- Metodo : POST
+- Input : 
+
+```json
+{
+    "descripcion" : "bla bla bla"
+}
+```
+
+- Output
+
+```json
+{
+    "msg" : ""
+}
+```
