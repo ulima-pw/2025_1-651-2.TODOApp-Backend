@@ -1,9 +1,8 @@
 import express, { Request, Response } from "express"
 import dotenv from "dotenv"
-import { listaTODOs, TODO } from "./data"
 import bodyParser from "body-parser"
 import cors from "cors"
-import { PrismaClient } from "./generated/prisma"
+import TodosController from "./controllers/TodosController"
 
 dotenv.config()
 const app = express()
@@ -25,127 +24,10 @@ app.get("/", (req : Request, resp : Response) => {
     resp.send("Endpoint raiz")
 })
 
-app.get("/todos", async (req : Request, resp : Response) => {
-    const prisma = new PrismaClient()
+// Configuracion entidad Todo
+app.use("/todos", TodosController())
 
-    const estado = req.query.estado
 
-    if (estado == undefined) {
-        // No hay estado, devolvemos todos los TODOs
-        const todos = await prisma.todo.findMany()
-        resp.json(todos)
-        return
-    }
-
-    // Devolvemos los TODOs filtrados por estado
-    const todos = await prisma.todo.findMany({
-        where : {
-            estado : estado == "0" ? false : true
-        }
-    })
-    resp.json(todos)
-})
-
-app.get("/todos/:id", async (req : Request, resp : Response) => {
-    const prisma = new PrismaClient()
-    const id = parseInt(req.params.id)
-
-    const todo = await prisma.todo.findUnique({
-        where : {
-            id : id
-        }
-    })
-
-    if (todo == null) {
-        // Error: no se encontro
-        resp.status(400).json({
-            msg : "Codigo incorrecto"
-        })
-    }
-
-    resp.json(todo)
-})
-
-app.post("/todos", async (req : Request, resp : Response) => {
-    const prisma = new PrismaClient()
-    const todo = req.body
-
-    if (todo.descripcion == undefined)
-    {
-        resp.status(400).json({
-            msg : "Debe enviar campo"
-        })
-        return
-    }
-
-    const todoCreado = await prisma.todo.create({
-        data : todo
-    })
-
-    resp.json({
-        msg : "",
-        todo : todoCreado
-    })
-})
-
-app.put("/todos/:id", async (req : Request, resp : Response) => {
-    const prisma = new PrismaClient()
-    const todo = req.body
-    const todoId = parseInt(req.params.id)
-
-    if (todoId == undefined)
-    {
-        resp.status(400).json({
-            msg : "Debe enviar un id como parte del path"
-        })
-        return
-    }
-
-    try {
-        const todoModificado = await prisma.todo.update({
-            where : {
-                id : todoId
-            },
-            data : todo
-        })
-        resp.json({
-            msg : "",
-            todo : todoModificado
-        })
-    }catch( e ) {
-        resp.status(400).json({
-            msg : "No existe todo con ese id"
-        })
-    }
-})
-
-app.delete("/todos/:id", async (req : Request, resp : Response) => {
-    const prisma = new PrismaClient()
-    const todoId = parseInt(req.params.id)
-
-    if (todoId == undefined) {
-        resp.status(400).json({
-            msg : "Debe enviar un ID de Todo."
-        })
-        return
-    }
-
-    try {
-        await prisma.todo.delete({
-            where : {
-                id : todoId
-            }
-        })
-        resp.json({
-            msg : ""
-        })
-    }catch (e) {
-        resp.status(400).json({
-            msg : "No existe Todo con ese id"
-        })
-        return
-    }
-})
 
 app.listen(PORT, () => {
     console.log(`Se inicio servidor en puerto ${PORT}`)
