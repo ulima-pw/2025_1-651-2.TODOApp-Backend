@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express"
-import { PrismaClient } from "../generated/prisma"
+import { PrismaClient, Todo } from "../generated/prisma"
 
 const TodosController = () => {
     const router = express.Router()
@@ -8,20 +8,42 @@ const TodosController = () => {
         const prisma = new PrismaClient()
     
         const estado = req.query.estado
+        const usuarioId = req.headers["usuarioid"]
     
+        if (usuarioId == undefined) {
+            resp.status(400).json({
+                msg : "Es necesario que envies un codigo de usuario."
+            })
+            return
+        }
+
         if (estado == undefined) {
             // No hay estado, devolvemos todos los TODOs
-            const todos = await prisma.todo.findMany()
+            const todos = await prisma.todo.findMany({
+                relationLoadStrategy: 'join',
+                where : {
+                    usuarioId : parseInt(usuarioId.toString())
+                },
+                include : {
+                    categoria : true
+                }
+            })
             resp.json(todos)
             return
         }
     
         // Devolvemos los TODOs filtrados por estado
         const todos = await prisma.todo.findMany({
+            relationLoadStrategy: 'join',
             where : {
-                estado : estado == "0" ? false : true
+                estado : estado == "0" ? false : true,
+                usuarioId : parseInt(usuarioId.toString())
+            },
+            include : {
+                categoria : true
             }
         })
+
         resp.json(todos)
     })
     
